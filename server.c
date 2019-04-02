@@ -65,8 +65,7 @@ int GetClientFD(int listenfd)
 	return connfd;
 }
 
-//will be splited to 2 seperate () for readinf and writing on parallel execution by threads
-int ReadWriteToFD(int connfd)
+int FileTransferTrial(int connfd)
 {
 	if(connfd < 0 )
 		return connfd;
@@ -76,65 +75,35 @@ int ReadWriteToFD(int connfd)
 	while((n=read(connfd, buf, MAXLINE)) != 0)
 	{
 		buf[n]='\0';
+		//printf("%d\n", (int)strlen(buf));
 		printf("Read : " ANSI_COLOR_GREEN "%s" ANSI_COLOR_RESET, buf);
-		if(strcmp("EXIT\n", buf)==0)
-		{
-			printf("Chat Ended\n");
-			break;
-		}
-		printf("Write : ");
+		// if(strcmp("EXIT\n", buf)==0)
+		// {
+		// 	printf("Chat Ended\n");
+		// 	break;
+		// }
+		//printf("Write : ");
 		fflush(stdin);
-		fgets(buf, MAXLINE, stdin);
+		buf[strlen(buf)-1]='\0';
+		FILE *fp;
+		fp = fopen(buf, "rb");
+		fseek (fp, 0, SEEK_END);
+		int length = ftell (fp);
+		fseek (fp, 0, SEEK_SET);
+    fread (buf, 1, length, fp);
+		fclose(fp);
 		write(connfd, buf, strlen(buf));
-		if(strcmp("EXIT\n", buf)==0)
-		{
-			printf("Chat Ended\n");			
-			break;
-		}
+		// if(strcmp("EXIT\n", buf)==0)
+		// {
+		// 	printf("Chat Ended\n");			
+		// 	break;
+		// }
 	}
 	return connfd;
 }
 
 
-// int FIleDownloadTrial(int connfd)
-// {
-// 	if(connfd < 0 )
-// 		return connfd;
-// 	size_t n;
-// 	char buf[MAXLINE];
-// 	int tmp;
-// 	while((n=read(connfd, buf, MAXLINE)) != 0)
-// 	{
-// 		buf[n]='\0';
-// 		//printf("%d\n", (int)strlen(buf));
-// 		printf("Read : " ANSI_COLOR_GREEN "%s" ANSI_COLOR_RESET, buf);
-// 		// if(strcmp("EXIT\n", buf)==0)
-// 		// {
-// 		// 	printf("Chat Ended\n");
-// 		// 	break;
-// 		// }
-// 		//printf("Write : ");
-// 		fflush(stdin);
-// 		buf[strlen(buf)-1]='\0';
-// 		FILE *fp;
-// 		fp = fopen(buf, "rb");
-// 		fseek (fp, 0, SEEK_END);
-// 		int length = ftell (fp);
-// 		fseek (fp, 0, SEEK_SET);
-//     fread (buf, 1, length, fp);
-// 		fclose(fp);
-// 		write(connfd, buf, strlen(buf));
-// 		// if(strcmp("EXIT\n", buf)==0)
-// 		// {
-// 		// 	printf("Chat Ended\n");			
-// 		// 	break;
-// 		// }
-// 	}
-// 	return connfd;
-// }
-
-
 int main(int argc, char* argv[])
 {
-	return ABS(close( ReadWriteToFD( GetClientFD( open_client_fd( argv[1] ) ) ) ) );
+	return ABS(close( FileTransferTrial( GetClientFD( open_client_fd( argv[1] ) ) ) ) );
 }

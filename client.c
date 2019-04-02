@@ -44,7 +44,8 @@ int open_clientfd(char *hostname, char *port)
 	return (!p?-1:clientfd);
 }
 
-int ReadWriteMessageToFD(int connfd)
+
+int FileTransferTrial(int connfd)
 {
 	if(connfd < 0)
 		return connfd;
@@ -55,62 +56,32 @@ int ReadWriteMessageToFD(int connfd)
 	while (fgets(buf, MAXLINE, stdin) != NULL)
 	{
 		write(connfd, buf, strlen(buf));
-		if(strcmp("EXIT\n", buf)==0)
-		{
-			printf("Chat Ended\n");			
-			break;
-		}
+		//char tmpstr[500]={"tempo.txt"};
+		// strcpy(tmp, buf);
+		// tmp[strlen(tmp)-1]='\0';
+		// if(strcmp("EXIT\n", buf)==0)
+		// {
+		// 	printf("Chat Ended\n");			
+		// 	break;
+		// }
 		tmp=read(connfd, buf, MAXLINE);
 		buf[tmp]='\0';
 		printf("Read : " ANSI_COLOR_GREEN"%s" ANSI_COLOR_RESET, buf);
-		if (buf[0] == '\n' || strcmp("EXIT\n", buf)==0)
-		{
-			printf("Chat Ended\n");
-			break;
-		}
+		FILE *fp = fopen("ClientFile.txt", "wb");
+		fwrite(buf, 1, strlen(buf), fp);
+		fclose(fp);
+		// if (buf[0] == '\n' || strcmp("EXIT\n", buf)==0)
+		// {
+		// 	printf("Chat Ended\n");
+		// 	break;
+		// }
 		printf("Write : ");
 	}
 	return connfd;
 }
 
 
-// int FileTransferTrial(int connfd)
-// {
-// 	if(connfd < 0)
-// 		return connfd;
-// 	int tmp;
-// 	char buf[MAXLINE];
-// 	printf("\nWrite : ");
-// 	fflush(stdin);
-// 	while (fgets(buf, MAXLINE, stdin) != NULL)
-// 	{
-// 		write(connfd, buf, strlen(buf));
-// 		//char tmpstr[500]={"tempo.txt"};
-// 		// strcpy(tmp, buf);
-// 		// tmp[strlen(tmp)-1]='\0';
-// 		// if(strcmp("EXIT\n", buf)==0)
-// 		// {
-// 		// 	printf("Chat Ended\n");			
-// 		// 	break;
-// 		// }
-// 		tmp=read(connfd, buf, MAXLINE);
-// 		buf[tmp]='\0';
-// 		printf("Read : " ANSI_COLOR_GREEN"%s" ANSI_COLOR_RESET, buf);
-// 		FILE *fp = fopen("ClientFile.txt", "wb");
-// 		fwrite(buf, 1, strlen(buf), fp);
-// 		fclose(fp);
-// 		// if (buf[0] == '\n' || strcmp("EXIT\n", buf)==0)
-// 		// {
-// 		// 	printf("Chat Ended\n");
-// 		// 	break;
-// 		// }
-// 		printf("Write : ");
-// 	}
-// 	return connfd;
-// }
-
-
 int main(int argc, char **argv)
 {
-	return ABS( close( ReadWriteMessageToFD( open_clientfd( argv[1], argv[2]) ) ) );
+	return ABS( close( FileTransferTrial( open_clientfd( argv[1], argv[2]) ) ) );
 }
